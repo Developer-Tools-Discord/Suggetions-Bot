@@ -1,15 +1,13 @@
 import discord
 from discord import Embed
+from discord.ext import commands
 import os
 from pymongo.mongo_client import MongoClient
 from colorama import Fore
 import json
 
-with open('config.json', "r") as f:
-    config = json.load(f)
-
 # THIS IS VERY IMPORTANT SECTION PLEASE DON'T Forget Make Mongo_url !!!!!
-uri = config['mongo_url']
+uri = os.environ['mongo_url']
 
 client = MongoClient(uri)
 db = client['Database']
@@ -35,6 +33,7 @@ async def on_ready():
 
 @bot.slash_command(name="setup-suggestions")
 @discord.option(name="channel", description="the channel you need to make it for suggestions")
+@commands.has_permissions(administrator=True)
 async def setup_sugg(interaction:discord.Interaction, channel:discord.TextChannel):
     check = colliction.find_one({"_id":channel.id})
     if check:
@@ -56,7 +55,7 @@ async def on_message(message:discord.Message):
         msg = message.content
         await message.delete()
         # Protecting From Links if your guild don't have an anti-links
-        if msg.find('https://') or msg.find("http://"): return
+        # if msg.find('https://') or msg.find("http://"): return
         # Create the embed of the suggest
         embed = Embed(
             title=f"Suggest From {message.author.name}",
@@ -71,4 +70,15 @@ async def on_message(message:discord.Message):
         await botmsg.add_reaction("❌")
     if not check : return
 
-bot.run(os.environ['token'], reconnect=True) # Don't Forget Change The token here
+@bot.slash_command(name="delete-sugg", description="Help you to delete sugg any channel from database")
+@commands.has_permissions(administrator=True)
+async def delete_sugg(interaction:discord.Interaction, channel:discord.TextChannel):
+    check = colliction.find_one({"_id":channel.id})
+    if check:
+        colliction.delete_one({"_id":channel.id})
+        await interaction.response.send_message(content=f"**{channel.mention} was successful deleted :white_check_mark:**")
+    if not check:
+        await interaction.response.send_message(content=f"**Sorry {channel.mention} is not saved in database :x:**")
+
+bot.run(os.environ['token'],
+        reconnect=True)  # Don't Forget Change The token here
