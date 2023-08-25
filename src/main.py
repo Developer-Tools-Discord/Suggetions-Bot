@@ -71,4 +71,4 @@ async def on_message(message:discord.Message):
         await botmsg.add_reaction("❌")
     if not check : return
 
-bot.run("YOUR-TOKEN-HERE", reconnect=True) # Don't Forget Change The token here
+bot.run(os.environ['token'], reconnect=True) # Don't Forget Change The token here
