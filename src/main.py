@@ -1,6 +1,5 @@
 import discord
 from discord import Embed
-import asyncio
 import os
 from pymongo.mongo_client import MongoClient
 from colorama import Fore
